@@ -221,7 +221,7 @@ RETURN
 # MAGIC select e.employee_id, e.first_name, e.last_name, m.manager_id, m.manager_email, 
 # MAGIC sys.crypto.decrypt(e.salary) as salary
 # MAGIC from pii_demo.test.employee_encrypt e join pii_demo.test.manager m on e.employee_id = m.employee_id
-# MAGIC where m.manager_email = current_user()
+# MAGIC where m.manager_email = session_user()
 
 # COMMAND ----------
 
