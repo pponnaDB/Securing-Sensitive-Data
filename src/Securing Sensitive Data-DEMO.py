@@ -20,11 +20,11 @@ dbutils.widgets.text(name="keyvault_user", defaultValue="payroll_managers", labe
 
 # MAGIC %sql
 # MAGIC --Create a pii_demo catalog & schema
-# MAGIC CREATE CATALOG IF NOT EXISTS pii_demo;
-# MAGIC CREATE SCHEMA IF NOT EXISTS pii_demo.test;
+# MAGIC CREATE CATALOG IF NOT EXISTS consume;
+# MAGIC CREATE SCHEMA IF NOT EXISTS consume.catalog;
 # MAGIC
-# MAGIC CREATE OR REPLACE TABLE pii_demo.test.employee_raw AS (SELECT * FROM read_files(
-# MAGIC   '/Volumes/pp_demo/test/example_payroll_data/employee1.csv',
+# MAGIC CREATE OR REPLACE TABLE consume.catalog.employee_hierarchy AS (SELECT * FROM read_files(
+# MAGIC   '/Volumes/consume/catalog/synthetic_data/employee_hierarchy.csv',
 # MAGIC   format => 'csv',
 # MAGIC   header => true,
 # MAGIC   inferSchema => true))
@@ -32,13 +32,13 @@ dbutils.widgets.text(name="keyvault_user", defaultValue="payroll_managers", labe
 # COMMAND ----------
 
 # MAGIC %sql
-# MAGIC SELECT * FROM pii_demo.test.employee_raw
+# MAGIC SELECT * FROM consume.catalog.employee_hierarchy
 
 # COMMAND ----------
 
 # MAGIC %sql
-# MAGIC CREATE OR REPLACE TABLE pii_demo.test.manager AS (SELECT * FROM read_files(
-# MAGIC   '/Volumes/pp_demo/test/example_payroll_data/manager1.csv',
+# MAGIC CREATE OR REPLACE TABLE consume.catalog.employee_upn AS (SELECT * FROM read_files(
+# MAGIC   '/Volumes/consume/catalog/synthetic_data/employee_upn.csv',
 # MAGIC   format => 'csv',
 # MAGIC   header => true,
 # MAGIC   inferSchema => true));
@@ -46,7 +46,7 @@ dbutils.widgets.text(name="keyvault_user", defaultValue="payroll_managers", labe
 # COMMAND ----------
 
 # MAGIC %sql
-# MAGIC select * from pii_demo.test.manager;
+# MAGIC select * from consume.catalog.employee_upn;
 
 # COMMAND ----------
 
@@ -177,17 +177,17 @@ RETURN
 # COMMAND ----------
 
 # MAGIC %sql
-# MAGIC CREATE OR REPLACE TABLE pii_demo.test.employee_encrypt AS (SELECT 
+# MAGIC CREATE OR REPLACE TABLE consume.catalog.payroll_encrypted AS (SELECT 
 # MAGIC employee_id,
 # MAGIC first_name,
 # MAGIC last_name,
 # MAGIC sys.crypto.encrypt(salary) AS salary
-# MAGIC FROM pii_demo.test.employee_raw)
+# MAGIC FROM consume.catalog.employee_hierarchy)
 
 # COMMAND ----------
 
 # MAGIC %sql
-# MAGIC select * from pii_demo.test.employee_encrypt;
+# MAGIC select * from consume.catalog.payroll_encrypted;
 
 # COMMAND ----------
 
@@ -217,11 +217,11 @@ RETURN
 # COMMAND ----------
 
 # MAGIC %sql
-# MAGIC create or replace view pii_demo.test.payroll_gold as
+# MAGIC create or replace view consume.catalog.payroll_decrypted as
 # MAGIC select e.employee_id, e.first_name, e.last_name, m.manager_id, m.manager_email, 
 # MAGIC sys.crypto.decrypt(e.salary) as salary
-# MAGIC from pii_demo.test.employee_encrypt e join pii_demo.test.manager m on e.employee_id = m.employee_id
-# MAGIC where m.manager_email = session_user()
+# MAGIC from consume.catalog.payroll_encrypted e join consume.catalog.employee_upn m on e.employee_id = m.employee_id
+# MAGIC where m.manager_email = current_user()
 
 # COMMAND ----------
 
@@ -232,7 +232,7 @@ RETURN
 # COMMAND ----------
 
 # MAGIC %sql
-# MAGIC select * from pii_demo.test.payroll_gold;
+# MAGIC select * from consume.catalog.payroll_decrypted;
 
 # COMMAND ----------
 
