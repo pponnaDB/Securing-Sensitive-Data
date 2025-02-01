@@ -1,4 +1,6 @@
 # Securing-Sensitive-Data
+![ssd](https://github.com/user-attachments/assets/9eb9e95f-9b24-471c-8680-57c28c6b28df)
+
 Securing Sensitive Data-DEMO
 
 Step 0 - Secret Scope, Key Encryption Key Name and User/Group to Access the Key as Inputs
